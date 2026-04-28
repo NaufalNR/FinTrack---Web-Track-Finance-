@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FinTrack — Personal Finance Tracker</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+  </head>
+  <body>
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon">₿</div>
+        <span class="logo-text">FinTrack</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-section="dashboard">
+          <span class="nav-icon">◈</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item" data-section="transactions">
+          <span class="nav-icon">⇄</span>
+          <span>Transaksi</span>
+        </a>
+        <a href="#" class="nav-item" data-section="analytics">
+          <span class="nav-icon">◎</span>
+          <span>Analitik</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-month">
+        <label>Periode</label>
+        <select id="monthFilter">
+          <option value="all">Semua Waktu</option>
+        </select>
+      </div>
+
+      <button class="export-btn" id="exportBtn">
+        <span>↓</span> Export CSV
+      </button>
+    </aside>
+
+    <!-- ===== MOBILE TOPBAR ===== -->
+    <header class="topbar">
+      <button class="hamburger" id="hamburger">☰</button>
+      <div class="topbar-logo">FinTrack</div>
+      <div class="topbar-month">
+        <select id="monthFilterMobile">
+          <option value="all">Semua</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main" id="main">
+      <!-- DASHBOARD SECTION -->
+      <section class="section active" id="section-dashboard">
+        <div class="section-header">
+          <h1 class="section-title">
+            Dashboard <span class="tag">Overview</span>
+          </h1>
+          <p class="section-sub" id="dateDisplay"></p>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="cards-grid">
+          <div class="card card--balance">
+            <div class="card-label">Saldo Bersih</div>
+            <div class="card-value" id="balanceDisplay">Rp 0</div>
+            <div class="card-trend" id="balanceTrend"></div>
+          </div>
+          <div class="card card--income">
+            <div class="card-label">Total Pemasukan</div>
+            <div class="card-value" id="incomeDisplay">Rp 0</div>
+            <div class="card-badge income-badge">↑ Masuk</div>
+          </div>
+          <div class="card card--expense">
+            <div class="card-label">Total Pengeluaran</div>
+            <div class="card-value" id="expenseDisplay">Rp 0</div>
+            <div class="card-badge expense-badge">↓ Keluar</div>
+          </div>
+          <div class="card card--saving">
+            <div class="card-label">Rasio Tabungan</div>
+            <div class="card-value" id="savingRatio">0%</div>
+            <div class="card-progress">
+              <div class="progress-bar" id="savingProgress"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Add -->
+        <div class="quick-add">
+          <div class="quick-add-header">
+            <h2>Tambah Transaksi</h2>
+            <div class="type-toggle">
+              <button class="type-btn active" data-type="expense">
+                Pengeluaran
+              </button>
+              <button class="type-btn" data-type="income">Pemasukan</button>
+            </div>
+          </div>
+          <form class="add-form" id="transactionForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Deskripsi</label>
+                <input
+                  type="text"
+                  id="descInput"
+                  placeholder="Mis: Makan siang..."
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label>Jumlah (Rp)</label>
+                <input
+                  type="number"
+                  id="amountInput"
+                  placeholder="50000"
+                  min="0"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Kategori</label>
+                <select id="categoryInput">
+                  <option value="">Pilih kategori...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Tanggal</label>
+                <input type="date" id="dateInput" required />
+              </div>
+            </div>
+            <button type="submit" class="submit-btn" id="submitBtn">
+              + Tambah Pengeluaran
+            </button>
+          </form>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="recent-section">
+          <div class="recent-header">
+            <h2>Transaksi Terbaru</h2>
+            <a href="#" class="see-all" data-section="transactions"
+              >Lihat Semua →</a
+            >
+          </div>
+          <div class="transaction-list" id="recentList">
+            <div class="empty-state" id="emptyRecent">
+              <div class="empty-icon">◎</div>
+              <p>Belum ada transaksi.<br />Mulai catat keuanganmu!</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TRANSACTIONS SECTION -->
+      <section class="section" id="section-transactions">
+        <div class="section-header">
+          <h1 class="section-title">
+            Transaksi <span class="tag">Semua</span>
+          </h1>
+        </div>
+
+        <!-- Filter & Search -->
+        <div class="filter-bar">
+          <input
+            type="text"
+            class="search-input"
+            id="searchInput"
+            placeholder="⌕  Cari transaksi..."
+          />
+          <select class="filter-select" id="categoryFilter">
+            <option value="all">Semua Kategori</option>
+          </select>
+          <select class="filter-select" id="typeFilter">
+            <option value="all">Semua Tipe</option>
+            <option value="income">Pemasukan</option>
+            <option value="expense">Pengeluaran</option>
+          </select>
+        </div>
+
+        <!-- Bulk Action Bar (muncul saat ada yang dipilih) -->
+        <div class="bulk-bar" id="bulkBar">
+          <div class="bulk-bar-left">
+            <div class="bulk-checkbox-wrap">
+              <input type="checkbox" id="selectAll" class="bulk-checkbox" />
+              <label for="selectAll" class="bulk-checkbox-label"></label>
+            </div>
+            <span class="bulk-count" id="bulkCount">0 dipilih</span>
+          </div>
+          <div class="bulk-bar-right">
+            <button class="bulk-deselect-btn" id="deselectAllBtn">
+              Batal Pilih
+            </button>
+            <button class="bulk-delete-btn" id="bulkDeleteBtn">
+              <span>🗑</span> Hapus yang Dipilih
+            </button>
+          </div>
+        </div>
+
+        <!-- List Header with Select All (selalu tampil saat ada data) -->
+        <div class="list-header" id="listHeader">
+          <div class="list-header-left">
+            <div class="bulk-checkbox-wrap">
+              <input
+                type="checkbox"
+                id="selectAllInline"
+                class="bulk-checkbox"
+              />
+              <label for="selectAllInline" class="bulk-checkbox-label"></label>
+            </div>
+            <span class="list-header-label">Pilih Semua</span>
+          </div>
+          <span class="list-header-count" id="listHeaderCount"></span>
+        </div>
+
+        <div class="transaction-list full" id="fullList">
+          <div class="empty-state" id="emptyFull">
+            <div class="empty-icon">◎</div>
+            <p>Belum ada transaksi.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ANALYTICS SECTION -->
+      <section class="section" id="section-analytics">
+        <div class="section-header">
+          <h1 class="section-title">
+            Analitik <span class="tag">Charts</span>
+          </h1>
+        </div>
+
+        <div class="charts-grid">
+          <div class="chart-card chart-card--wide">
+            <div class="chart-title">Tren Bulanan</div>
+            <div class="chart-wrap">
+              <canvas id="monthlyChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Pengeluaran per Kategori</div>
+            <div class="chart-wrap">
+              <canvas id="categoryChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Pemasukan vs Pengeluaran</div>
+            <div class="chart-wrap">
+              <canvas id="compareChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category Breakdown -->
+        <div class="breakdown-card">
+          <div class="chart-title">Rincian Kategori</div>
+          <div class="breakdown-list" id="breakdownList"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ===== TOAST ===== -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ===== MODAL DELETE ===== -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <div class="modal-icon" id="modalIcon">⚠</div>
+        <h3 id="modalTitle">Hapus Transaksi?</h3>
+        <p id="modalDesc">Tindakan ini tidak dapat dibatalkan.</p>
+        <div class="modal-btns">
+          <button class="modal-cancel" id="modalCancel">Batal</button>
+          <button class="modal-confirm" id="modalConfirm">Hapus</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- JS -->
+    <script src="js/storage.js"></script>
+    <script src="js/chart-manager.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
