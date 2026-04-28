@@ -159,6 +159,38 @@ const ChartManager = (() => {
 
     if (categoryChart) categoryChart.destroy();
 
+    // Show placeholder if no expense data
+    if (!labels.length) {
+      categoryChart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: ["Belum ada pengeluaran"],
+          datasets: [
+            {
+              data: [1],
+              backgroundColor: ["rgba(255,255,255,0.05)"],
+              borderColor: ["rgba(255,255,255,0.1)"],
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          ...baseOptions,
+          cutout: "68%",
+          plugins: {
+            ...baseOptions.plugins,
+            legend: {
+              display: true,
+              position: "bottom",
+              labels: { color: "#545d75", font: { size: 11 } },
+            },
+            tooltip: { enabled: false },
+          },
+        },
+      });
+      return;
+    }
+
     categoryChart = new Chart(ctx, {
       type: "doughnut",
       data: {
@@ -267,10 +299,40 @@ const ChartManager = (() => {
 
   /** Update all charts */
   function updateAll(transactions) {
-    if (!transactions.length) return destroyAll();
+    if (!transactions.length) {
+      destroyAll();
+      showEmptyCharts();
+      return;
+    }
     renderMonthly(transactions);
     renderCategory(transactions);
     renderCompare(transactions);
+  }
+
+  function showEmptyCharts() {
+    ["monthlyChart", "categoryChart", "compareChart"].forEach((id) => {
+      const ctx = document.getElementById(id)?.getContext("2d");
+      if (!ctx) return;
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["Belum ada data"],
+          datasets: [
+            {
+              data: [0],
+              backgroundColor: "rgba(255,255,255,0.04)",
+              borderColor: "rgba(255,255,255,0.08)",
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          ...baseOptions,
+          plugins: { ...baseOptions.plugins, tooltip: { enabled: false } },
+          scales: darkScales,
+        },
+      });
+    });
   }
 
   function destroyAll() {

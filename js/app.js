@@ -112,7 +112,12 @@ function navigateTo(section) {
     ?.classList.add("active");
 
   if (section === "analytics") {
-    setTimeout(() => ChartManager.updateAll(getFilteredTransactions()), 100);
+    // Use double rAF so the section is fully painted before Chart.js reads canvas size
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        ChartManager.updateAll(getFilteredTransactions());
+      });
+    });
   }
 }
 
@@ -278,12 +283,14 @@ function getSearchFilteredTransactions() {
 
 // ─── RENDER ──────────────────────────────
 function render() {
+  const filtered = getFilteredTransactions();
   renderSummary();
   renderRecentList();
   renderTransactionList();
+  renderBreakdown(filtered); // always update breakdown independently
 
   if (state.activeSection === "analytics") {
-    ChartManager.updateAll(getFilteredTransactions());
+    ChartManager.updateAll(filtered);
   }
 }
 
@@ -371,7 +378,6 @@ function renderTransactionList() {
   }
   empty.style.display = "none";
   txs.forEach((t) => el.appendChild(createTxElement(t, true)));
-  renderBreakdown(getFilteredTransactions());
   updateBulkBar();
   updateSelectAllState();
 }
