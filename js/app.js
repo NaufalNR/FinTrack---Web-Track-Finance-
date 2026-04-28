@@ -769,6 +769,20 @@ function escapeHtml(str) {
 
 // ─── SAMPLE DATA (first run) ─────────────
 function seedSampleData() {
+  // Bersihkan duplikasi dari bug lama (jika ada)
+  const seen = new Set();
+  const deduped = state.transactions.filter((t) => {
+    const key = `${t.date}-${t.desc}-${t.amount}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  if (deduped.length !== state.transactions.length) {
+    Storage.save(deduped);
+    state.transactions = deduped;
+  }
+
+  // Hanya seed jika benar-benar kosong
   if (state.transactions.length > 0) return;
 
   const today = new Date();
@@ -863,6 +877,7 @@ function seedSampleData() {
 
 // ─── BOOTSTRAP ───────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
+  state.transactions = Storage.load(); // ← load dulu sebelum seed check
   seedSampleData();
   init();
 });
